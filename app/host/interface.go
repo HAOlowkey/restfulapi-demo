@@ -11,8 +11,8 @@ type Service interface {
 }
 
 type QueryHostRequest struct {
-	pageSize int
-	pageNum  int
+	PageSize int
+	PageNum  int
 }
 
 type DescribeHostRequest struct {
