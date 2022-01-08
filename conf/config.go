@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"go.uber.org/zap"
+	"github.com/infraboard/mcube/logger/zap"
 )
 
 var (

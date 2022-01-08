@@ -9,6 +9,13 @@ type Host struct {
 	*Describe
 }
 
+func NewDefaultHost() *Host {
+	return &Host{
+		Resource: &Resource{},
+		Describe: &Describe{},
+	}
+}
+
 var validate = validator.New()
 
 func (h *Host) Validate() error {
@@ -68,4 +75,10 @@ type Set struct {
 func (s *Set) Add(h *Host) {
 	s.Items = append(s.Items, h)
 	s.Total += 1
+}
+
+func NewDefaultSet() *Set {
+	return &Set{
+		Items: []*Host{},
+	}
 }

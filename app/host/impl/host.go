@@ -60,14 +60,45 @@ func (i *impl) CreateHost(ctx context.Context, ins *host.Host) (*host.Host, erro
 		ins.KeyPairName, ins.SecurityGroups)
 
 	if err != nil {
-		return nil, fmt.Errorf("executea describe sql error, %v", err)
+		return nil, fmt.Errorf("execute describe sql error, %v", err)
 	}
 
 	return ins, nil
 }
 
-func (ins *impl) QueryHost(context.Context, *host.QueryHostRequest) (*host.Set, error) {
-	return nil, nil
+func (i *impl) QueryHost(ctx context.Context, q *host.QueryHostRequest) (*host.Set, error) {
+	i.log.Debugf("sql: %s args: %s %s", queryHostSQL, q.Offset(), q.PageSize)
+
+	stmt, err := i.db.Prepare(queryHostSQL)
+
+	if err != nil {
+		return nil, fmt.Errorf("prepare query host sql error, %v", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query(q.Offset(), q.PageSize)
+	if err != nil {
+		return nil, err
+	}
+
+	set := host.NewDefaultSet()
+
+	for rows.Next() {
+		ins := host.NewDefaultHost()
+		err := rows.Scan(&ins.Id, &ins.Vendor, &ins.Region, &ins.Zone, &ins.CreateAt, &ins.ExpireAt,
+			&ins.Category, &ins.Type, &ins.InstanceId, &ins.Name,
+			&ins.Description, &ins.Status, &ins.UpdateAt, &ins.SyncAt, &ins.SyncAccount,
+			&ins.PublicIP, &ins.PrivateIP, &ins.PayType, &ins.ResourceHash, &ins.DescribeHash,
+			&ins.Id, &ins.CPU,
+			&ins.Memory, &ins.GPUAmount, &ins.GPUSpec, &ins.OSType, &ins.OSName,
+			&ins.SerialNumber, &ins.ImageID, &ins.InternetMaxBandwidthOut, &ins.InternetMaxBandwidthIn,
+			&ins.KeyPairName, &ins.SecurityGroups)
+		if err != nil {
+			return nil, err
+		}
+		set.Add(ins)
+	}
+	return set, nil
 }
 
 func (ins *impl) DescribeHost(context.Context, *host.DescribeHostRequest) (*host.Host, error) {
