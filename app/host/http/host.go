@@ -20,7 +20,11 @@ func (h *handler) CreateHost(w http.ResponseWriter, r *http.Request, _ httproute
 
 	h.log.Debugf("receive body %s", string(body))
 	req := host.NewDefaultHost()
-	json.Unmarshal(body, req)
+	err = json.Unmarshal(body, req)
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
 	ins, err := h.host.CreateHost(r.Context(), req)
 
 	if err != nil {
@@ -67,4 +71,56 @@ func (h *handler) DescribeHost(w http.ResponseWriter, r *http.Request, p httprou
 		return
 	}
 	response.Success(w, host)
+}
+
+func (h *handler) PutUpdateHost(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	body, err := request.ReadBody(r)
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
+
+	req := host.NewPutUpdateHostRequest()
+	h.log.Debugf("receive body %s", string(body))
+	err = json.Unmarshal(body, req)
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
+
+	req.Id = p.ByName("id")
+
+	ins, err := h.host.UpdateHost(r.Context(), req)
+
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
+	response.Success(w, ins)
+}
+
+func (h *handler) PatchUpdateHost(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	body, err := request.ReadBody(r)
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
+
+	req := host.NewPatchUpdateHostRequest()
+	h.log.Debugf("receive body %s", string(body))
+	err = json.Unmarshal(body, req)
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
+
+	req.Id = p.ByName("id")
+
+	ins, err := h.host.UpdateHost(r.Context(), req)
+
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
+	response.Success(w, ins)
 }

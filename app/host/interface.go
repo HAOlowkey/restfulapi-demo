@@ -24,10 +24,32 @@ type DescribeHostRequest struct {
 	Id string
 }
 
+type UpdateMode int
+
+const (
+	PATCH UpdateMode = iota
+	PUT
+)
+
+func NewPutUpdateHostRequest() *UpdateHostRequest {
+	return &UpdateHostRequest{
+		UpdateMode: PUT,
+		Host:       NewDefaultHost(),
+	}
+}
+
+func NewPatchUpdateHostRequest() *UpdateHostRequest {
+	return &UpdateHostRequest{
+		UpdateMode: PATCH,
+		Host:       NewDefaultHost(),
+	}
+}
+
 type UpdateHostRequest struct {
-	Id int
+	UpdateMode
+	*Host
 }
 
 type DeleteHostRequest struct {
-	Id int
+	Id string
 }

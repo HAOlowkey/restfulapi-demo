@@ -30,4 +30,6 @@ func (h *handler) Register(r *httprouter.Router) {
 	// http.HandleFunc("/host", h.CreateHost)
 	r.GET("/hosts", h.QueryHost)
 	r.GET("/hosts/:id", h.DescribeHost)
+	r.PUT("/hosts/:id", h.PutUpdateHost)
+	r.PATCH("/hosts/:id", h.PatchUpdateHost)
 }

@@ -159,10 +159,45 @@ func (i *impl) DescribeHost(ctx context.Context, q *host.DescribeHostRequest) (*
 	return ins, nil
 }
 
-func (ins *impl) UpdateHost(context.Context, *host.UpdateHostRequest) (*host.Host, error) {
-	return nil, nil
+func (i *impl) UpdateHost(ctx context.Context, q *host.UpdateHostRequest) (*host.Host, error) {
+
+	ins, err := i.DescribeHost(ctx, &host.DescribeHostRequest{q.Id})
+	if err != nil {
+		return nil, err
+	}
+
+	switch q.UpdateMode {
+	case host.PUT:
+		ins.PutUpdate(q.Resource, q.Describe)
+	case host.PATCH:
+		err := ins.PatchUpdate(q.Resource, q.Describe)
+		if err != nil {
+			return nil, err
+		}
+	default:
+		return nil, fmt.Errorf("not support %v method", q.UpdateMode)
+	}
+
+	if err := ins.Validate(); err != nil {
+		return nil, err
+	}
+
+	stmt, err := i.db.Prepare(updateResourceSQL)
+	if err != nil {
+		return nil, err
+	}
+	defer stmt.Close()
+
+	// DML
+	// vendor=?,region=?,zone=?,expire_at=?,name=?,description=? WHERE id = ?
+	_, err = stmt.Exec(ins.Vendor, ins.Region, ins.Zone, ins.ExpireAt, ins.Name, ins.Description, ins.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return ins, nil
 }
 
-func (ins *impl) DeleteHost(context.Context, *host.DeleteHostRequest) (*host.Host, error) {
+func (i *impl) DeleteHost(ctx context.Context, q *host.DeleteHostRequest) (*host.Host, error) {
 	return nil, nil
 }

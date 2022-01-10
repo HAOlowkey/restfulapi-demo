@@ -1,6 +1,11 @@
 package host
 
-import "github.com/go-playground/validator/v10"
+import (
+	"time"
+
+	"github.com/go-playground/validator/v10"
+	"github.com/imdario/mergo"
+)
 
 type Host struct {
 	ResourceHash string `json:"resource_hash"`
@@ -75,6 +80,37 @@ type Set struct {
 func (s *Set) Add(h *Host) {
 	s.Items = append(s.Items, h)
 	s.Total += 1
+}
+
+func (h *Host) PutUpdate(res *Resource, desc *Describe) {
+	h.UpdateAt = time.Now().UnixNano() / 1000000
+	if res != nil {
+		h.Resource = res
+	}
+
+	if desc != nil {
+		h.Describe = desc
+	}
+}
+
+func (h *Host) PatchUpdate(res *Resource, desc *Describe) error {
+	h.UpdateAt = time.Now().UnixNano() / 1000000
+
+	if res != nil {
+		err := mergo.MergeWithOverwrite(h.Resource, res)
+		if err != nil {
+			return err
+		}
+	}
+
+	if desc != nil {
+		err := mergo.MergeWithOverwrite(h.Describe, desc)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func NewDefaultSet() *Set {

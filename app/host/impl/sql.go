@@ -13,4 +13,8 @@ internet_max_bandwidth_in,key_pair_name,security_groups) VALUES (?,?,?,?,?,?,?,?
 	queryHostSQL        = `SELECT * FROM resource LEFT JOIN host ON resource.id = host.resource_id ORDER BY create_at DESC LIMIT ?,?`
 	queryHostSQLKeyWord = `SELECT * FROM resource LEFT JOIN host ON resource.id = host.resource_id WHERE name like ? ORDER BY create_at DESC LIMIT ?,?`
 	describeHostSQL     = `SELECT * FROM resource LEFT JOIN host ON resource.id = host.resource_id WHERE id=?`
+
+	updateResourceSQL = `UPDATE resource SET vendor=?,region=?,zone=?,expire_at=?,name=?,description=? WHERE id = ?`
+
+	updateHostSQL = `UPDATE host SET cpu=?,memory=? WHERE resource_id = ?`
 )
