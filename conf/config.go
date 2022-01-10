@@ -124,6 +124,10 @@ type app struct {
 	Key  string `toml:"key"`
 }
 
+func (a *app) Addr() string {
+	return fmt.Sprintf("%s:%s", a.Host, a.Port)
+}
+
 type log struct {
 	Level   string    `toml:"level"`
 	PathDir string    `toml:"dir"`

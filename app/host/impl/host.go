@@ -4,6 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"strconv"
+
+	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/HAOlowkey/restfulapi-demo/app/host"
 )
@@ -26,10 +29,10 @@ func (i *impl) CreateHost(ctx context.Context, ins *host.Host) (*host.Host, erro
 
 	defer func() {
 		if err != nil {
-			err := tx.Rollback()
+			err = tx.Rollback()
 			i.log.Debugf("tx rollback error,%s", err)
 		} else {
-			err := tx.Commit()
+			err = tx.Commit()
 			i.log.Debugf("tx commit error,%s", err)
 		}
 	}()
@@ -41,7 +44,7 @@ func (i *impl) CreateHost(ctx context.Context, ins *host.Host) (*host.Host, erro
 
 	defer resStmt.Close()
 
-	_, err = resStmt.Exec(ins.Id, ins.Vendor, ins.Region, ins.Zone, ins.CreateAt, ins.ExpireAt, ins.Category, ins.InstanceId,
+	_, err = resStmt.Exec(ins.Id, ins.Vendor, ins.Region, ins.Zone, ins.CreateAt, ins.ExpireAt, ins.Category, ins.Type, ins.InstanceId,
 		ins.Name, ins.Description, ins.Status, ins.UpdateAt, ins.SyncAt, ins.SyncAccount, ins.PublicIP,
 		ins.PrivateIP, ins.PayType, ins.ResourceHash, ins.DescribeHash)
 	if err != nil {
@@ -67,7 +70,7 @@ func (i *impl) CreateHost(ctx context.Context, ins *host.Host) (*host.Host, erro
 }
 
 func (i *impl) QueryHost(ctx context.Context, q *host.QueryHostRequest) (*host.Set, error) {
-	i.log.Debugf("sql: %s args: %s %s", queryHostSQL, q.Offset(), q.PageSize)
+	i.log.Debugf("sql: %s args: %s %s", queryHostSQL, strconv.Itoa(q.Offset()), strconv.Itoa(q.PageSize))
 
 	stmt, err := i.db.Prepare(queryHostSQL)
 
@@ -76,7 +79,7 @@ func (i *impl) QueryHost(ctx context.Context, q *host.QueryHostRequest) (*host.S
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(q.Offset(), q.PageSize)
+	rows, err := stmt.Query(strconv.Itoa(q.Offset()), strconv.Itoa(q.PageSize))
 	if err != nil {
 		return nil, err
 	}

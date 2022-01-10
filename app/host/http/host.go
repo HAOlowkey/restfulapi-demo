@@ -1,7 +1,7 @@
 package http
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -19,8 +19,15 @@ func (h *handler) CreateHost(w http.ResponseWriter, r *http.Request, _ httproute
 	}
 
 	h.log.Debugf("receive body %s", string(body))
+	req := host.NewDefaultHost()
+	json.Unmarshal(body, req)
+	ins, err := h.host.CreateHost(r.Context(), req)
 
-	fmt.Println(body)
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
+	response.Success(w, ins)
 }
 
 func (h *handler) QueryHost(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {

@@ -5,7 +5,7 @@ port = "8050"
 key  = "this is your app key"
 
 [mysql]
-host = "192.168.25.190"
+host = "192.168.21.190"
 port = "3306"
 username = "root"
 password = "Root@123!"

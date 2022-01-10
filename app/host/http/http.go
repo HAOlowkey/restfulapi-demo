@@ -8,7 +8,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-var api = handler{}
+var Api = handler{}
 
 type handler struct {
 	log  logger.Logger
@@ -25,7 +25,7 @@ func (h *handler) Init() {
 	h.host = app.Host
 }
 
-func (h *handler) Register(r httprouter.Router) {
+func (h *handler) Register(r *httprouter.Router) {
 	r.POST("/host", h.CreateHost)
 	// http.HandleFunc("/host", h.CreateHost)
 	r.GET("/host", h.QueryHost)
