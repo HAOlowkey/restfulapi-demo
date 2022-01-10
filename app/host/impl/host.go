@@ -7,13 +7,21 @@ import (
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/infraboard/mcube/types/ftime"
+	"github.com/rs/xid"
 
 	"github.com/HAOlowkey/restfulapi-demo/app/host"
 )
 
 func (i *impl) CreateHost(ctx context.Context, ins *host.Host) (*host.Host, error) {
+
 	if err := ins.Validate(); err != nil {
 		return nil, err
+	}
+
+	ins.Id = xid.New().String()
+	if ins.CreateAt == 0 {
+		ins.CreateAt = ftime.Now().Timestamp()
 	}
 
 	var (
@@ -30,10 +38,14 @@ func (i *impl) CreateHost(ctx context.Context, ins *host.Host) (*host.Host, erro
 	defer func() {
 		if err != nil {
 			err = tx.Rollback()
-			i.log.Debugf("tx rollback error,%s", err)
+			if err != nil {
+				i.log.Debugf("tx rollback error,%v", err)
+			}
 		} else {
 			err = tx.Commit()
-			i.log.Debugf("tx commit error,%s", err)
+			if err != nil {
+				i.log.Debugf("tx commit error,%v", err)
+			}
 		}
 	}()
 
@@ -70,16 +82,29 @@ func (i *impl) CreateHost(ctx context.Context, ins *host.Host) (*host.Host, erro
 }
 
 func (i *impl) QueryHost(ctx context.Context, q *host.QueryHostRequest) (*host.Set, error) {
-	i.log.Debugf("sql: %s args: %s %s", queryHostSQL, strconv.Itoa(q.Offset()), strconv.Itoa(q.PageSize))
-
-	stmt, err := i.db.Prepare(queryHostSQL)
+	var (
+		err  error
+		stmt *sql.Stmt
+		rows *sql.Rows
+	)
+	if q.KeyWords == "" {
+		i.log.Debugf("sql: %s args: %s %s", queryHostSQL, strconv.Itoa(q.Offset()), strconv.Itoa(q.PageSize))
+		stmt, err = i.db.Prepare(queryHostSQL)
+	} else {
+		i.log.Debugf("sql: %s args: %s %s %s", queryHostSQLKeyWord, q.KeyWords, strconv.Itoa(q.Offset()), strconv.Itoa(q.PageSize))
+		stmt, err = i.db.Prepare(queryHostSQLKeyWord)
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("prepare query host sql error, %v", err)
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query(strconv.Itoa(q.Offset()), strconv.Itoa(q.PageSize))
+	if q.KeyWords == "" {
+		rows, err = stmt.Query(strconv.Itoa(q.Offset()), strconv.Itoa(q.PageSize))
+	} else {
+		rows, err = stmt.Query("%"+q.KeyWords+"%", strconv.Itoa(q.Offset()), strconv.Itoa(q.PageSize))
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -104,8 +129,34 @@ func (i *impl) QueryHost(ctx context.Context, q *host.QueryHostRequest) (*host.S
 	return set, nil
 }
 
-func (ins *impl) DescribeHost(context.Context, *host.DescribeHostRequest) (*host.Host, error) {
-	return nil, nil
+func (i *impl) DescribeHost(ctx context.Context, q *host.DescribeHostRequest) (*host.Host, error) {
+
+	i.log.Debugf("sql: %s args: %s", describeHostSQL, q.Id)
+	stmt, err := i.db.Prepare(describeHostSQL)
+
+	if err != nil {
+		return nil, fmt.Errorf("prepare query host sql error, %v", err)
+	}
+	defer stmt.Close()
+
+	row := stmt.QueryRow(q.Id)
+
+	ins := host.NewDefaultHost()
+
+	err = row.Scan(&ins.Id, &ins.Vendor, &ins.Region, &ins.Zone, &ins.CreateAt, &ins.ExpireAt,
+		&ins.Category, &ins.Type, &ins.InstanceId, &ins.Name,
+		&ins.Description, &ins.Status, &ins.UpdateAt, &ins.SyncAt, &ins.SyncAccount,
+		&ins.PublicIP, &ins.PrivateIP, &ins.PayType, &ins.ResourceHash, &ins.DescribeHash,
+		&ins.Id, &ins.CPU,
+		&ins.Memory, &ins.GPUAmount, &ins.GPUSpec, &ins.OSType, &ins.OSName,
+		&ins.SerialNumber, &ins.ImageID, &ins.InternetMaxBandwidthOut, &ins.InternetMaxBandwidthIn,
+		&ins.KeyPairName, &ins.SecurityGroups)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return ins, nil
 }
 
 func (ins *impl) UpdateHost(context.Context, *host.UpdateHostRequest) (*host.Host, error) {

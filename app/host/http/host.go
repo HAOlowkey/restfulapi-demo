@@ -44,6 +44,7 @@ func (h *handler) QueryHost(w http.ResponseWriter, r *http.Request, _ httprouter
 	req := &host.QueryHostRequest{
 		PageSize: ps,
 		PageNum:  pn,
+		KeyWords: qs.Get("keywords"),
 	}
 
 	set, err := h.host.QueryHost(r.Context(), req)
@@ -52,4 +53,18 @@ func (h *handler) QueryHost(w http.ResponseWriter, r *http.Request, _ httprouter
 		return
 	}
 	response.Success(w, set)
+}
+
+func (h *handler) DescribeHost(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+
+	req := &host.DescribeHostRequest{
+		Id: p.ByName("id"),
+	}
+
+	host, err := h.host.DescribeHost(r.Context(), req)
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
+	response.Success(w, host)
 }

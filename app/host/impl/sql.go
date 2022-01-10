@@ -10,6 +10,7 @@ private_ip,pay_type,resource_hash,describe_hash) VALUES (?,?,?,?,?,?,?,?,?,?,?,?
 resource_id,cpu,memory,gpu_amount,gpu_spec,os_type,os_name,
 serial_number,image_id,internet_max_bandwidth_out,
 internet_max_bandwidth_in,key_pair_name,security_groups) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`
-	queryHostSQL      = `SELECT * FROM resource LEFT JOIN host ON resource.id = host.resource_id ORDER BY create_at DESC LIMIT ?,?`
-	queryCountHostSQL = `SELECT COUNT(*) FROM resource LEFT JOIN host ON resource.id = host.resource_id ORDER BY create_at DESC LIMIT ?,?`
+	queryHostSQL        = `SELECT * FROM resource LEFT JOIN host ON resource.id = host.resource_id ORDER BY create_at DESC LIMIT ?,?`
+	queryHostSQLKeyWord = `SELECT * FROM resource LEFT JOIN host ON resource.id = host.resource_id WHERE name like ? ORDER BY create_at DESC LIMIT ?,?`
+	describeHostSQL     = `SELECT * FROM resource LEFT JOIN host ON resource.id = host.resource_id WHERE id=?`
 )

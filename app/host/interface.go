@@ -13,6 +13,7 @@ type Service interface {
 type QueryHostRequest struct {
 	PageSize int
 	PageNum  int
+	KeyWords string
 }
 
 func (q *QueryHostRequest) Offset() int {
@@ -20,7 +21,7 @@ func (q *QueryHostRequest) Offset() int {
 }
 
 type DescribeHostRequest struct {
-	Id int
+	Id string
 }
 
 type UpdateHostRequest struct {

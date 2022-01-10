@@ -29,5 +29,5 @@ func (h *handler) Register(r *httprouter.Router) {
 	r.POST("/hosts", h.CreateHost)
 	// http.HandleFunc("/host", h.CreateHost)
 	r.GET("/hosts", h.QueryHost)
-
+	r.GET("/hosts/:id", h.DescribeHost)
 }
