@@ -26,8 +26,8 @@ func (h *handler) Init() {
 }
 
 func (h *handler) Register(r *httprouter.Router) {
-	r.POST("/host", h.CreateHost)
+	r.POST("/hosts", h.CreateHost)
 	// http.HandleFunc("/host", h.CreateHost)
-	r.GET("/host", h.QueryHost)
+	r.GET("/hosts", h.QueryHost)
 
 }

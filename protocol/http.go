@@ -17,7 +17,7 @@ func NewHttpService() *HttpService {
 	r := httprouter.New()
 	return &HttpService{
 		r: r,
-		l: zap.L().Named("HTTP SERVICE"),
+		l: zap.L().Named("Http Service"),
 		server: &http.Server{
 			Addr:              conf.C().App.Addr(),
 			Handler:           r,
@@ -49,6 +49,7 @@ func (s *HttpService) Start() error {
 	if err := s.server.ListenAndServe(); err != nil {
 		if err == http.ErrServerClosed {
 			s.l.Info("service is stopped")
+			return nil
 		}
 		return fmt.Errorf("start service error, %s", err.Error())
 	}
