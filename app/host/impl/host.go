@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/infraboard/mcube/exception"
 	"github.com/infraboard/mcube/types/ftime"
 	"github.com/rs/xid"
 
@@ -153,6 +154,9 @@ func (i *impl) DescribeHost(ctx context.Context, q *host.DescribeHostRequest) (*
 		&ins.KeyPairName, &ins.SecurityGroups)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, exception.NewNotFound("host %s not found", q.Id)
+		}
 		return nil, err
 	}
 
@@ -161,7 +165,7 @@ func (i *impl) DescribeHost(ctx context.Context, q *host.DescribeHostRequest) (*
 
 func (i *impl) UpdateHost(ctx context.Context, q *host.UpdateHostRequest) (*host.Host, error) {
 
-	ins, err := i.DescribeHost(ctx, &host.DescribeHostRequest{q.Id})
+	ins, err := i.DescribeHost(ctx, &host.DescribeHostRequest{Id: q.Id})
 	if err != nil {
 		return nil, err
 	}
@@ -199,12 +203,37 @@ func (i *impl) UpdateHost(ctx context.Context, q *host.UpdateHostRequest) (*host
 }
 
 func (i *impl) DeleteHost(ctx context.Context, q *host.DeleteHostRequest) (*host.Host, error) {
-	ins, err := i.DescribeHost(ctx, &host.DescribeHostRequest{q.Id})
+
+	var (
+		resstmt  *sql.Stmt
+		descstmt *sql.Stmt
+		err      error
+	)
+
+	ins, err := i.DescribeHost(ctx, &host.DescribeHostRequest{Id: q.Id})
+	if err != nil {
+		return nil, err
+	}
+	tx, err := i.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	resstmt, err := i.db.Prepare(deleteResourceSQL)
+	defer func() {
+		if err != nil {
+			err = tx.Rollback()
+			if err != nil {
+				i.log.Debugf("tx rollback error,%v", err)
+			}
+		} else {
+			err = tx.Commit()
+			if err != nil {
+				i.log.Debugf("tx commit error,%v", err)
+			}
+		}
+	}()
+
+	resstmt, err = i.db.Prepare(deleteResourceSQL)
 	if err != nil {
 		return nil, err
 	}
@@ -214,7 +243,7 @@ func (i *impl) DeleteHost(ctx context.Context, q *host.DeleteHostRequest) (*host
 		return nil, err
 	}
 
-	descstmt, err := i.db.Prepare(deleteDescribeSQL)
+	descstmt, err = i.db.Prepare(deleteDescribeSQL)
 	if err != nil {
 		return nil, err
 	}

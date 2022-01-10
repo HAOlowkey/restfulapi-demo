@@ -16,7 +16,9 @@ type Host struct {
 
 func NewDefaultHost() *Host {
 	return &Host{
-		Resource: &Resource{},
+		Resource: &Resource{
+			CreateAt: time.Now().UnixMilli(),
+		},
 		Describe: &Describe{},
 	}
 }
