@@ -3,8 +3,8 @@ package host
 import "github.com/go-playground/validator/v10"
 
 type Host struct {
-	ResourceHash string
-	DescribeHash string
+	ResourceHash string `json:"resource_hash"`
+	DescribeHash string `json:"describe_hash"`
 	*Resource
 	*Describe
 }
@@ -68,8 +68,8 @@ type Describe struct {
 }
 
 type Set struct {
-	Total int
-	Items []*Host
+	Total int     `json:"total"`
+	Items []*Host `json:"items"`
 }
 
 func (s *Set) Add(h *Host) {
