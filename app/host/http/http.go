@@ -32,4 +32,5 @@ func (h *handler) Register(r *httprouter.Router) {
 	r.GET("/hosts/:id", h.DescribeHost)
 	r.PUT("/hosts/:id", h.PutUpdateHost)
 	r.PATCH("/hosts/:id", h.PatchUpdateHost)
+	r.DELETE("/hosts/:id", h.DeleteHost)
 }

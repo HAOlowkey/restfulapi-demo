@@ -16,5 +16,8 @@ internet_max_bandwidth_in,key_pair_name,security_groups) VALUES (?,?,?,?,?,?,?,?
 
 	updateResourceSQL = `UPDATE resource SET vendor=?,region=?,zone=?,expire_at=?,name=?,description=? WHERE id = ?`
 
-	updateHostSQL = `UPDATE host SET cpu=?,memory=? WHERE resource_id = ?`
+	updateDescribeSQL = `UPDATE host SET cpu=?,memory=? WHERE resource_id = ?`
+
+	deleteResourceSQL = `DELETE FROM resource where id = ?`
+	deleteDescribeSQL = `DELETE FROM host where resource_id = ?`
 )

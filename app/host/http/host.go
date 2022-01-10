@@ -124,3 +124,12 @@ func (h *handler) PatchUpdateHost(w http.ResponseWriter, r *http.Request, p http
 	}
 	response.Success(w, ins)
 }
+
+func (h *handler) DeleteHost(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	ins, err := h.host.DeleteHost(r.Context(), &host.DeleteHostRequest{Id: p.ByName("id")})
+	if err != nil {
+		response.Failed(w, err)
+		return
+	}
+	response.Success(w, ins)
+}

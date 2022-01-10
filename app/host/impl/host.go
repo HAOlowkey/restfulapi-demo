@@ -199,5 +199,30 @@ func (i *impl) UpdateHost(ctx context.Context, q *host.UpdateHostRequest) (*host
 }
 
 func (i *impl) DeleteHost(ctx context.Context, q *host.DeleteHostRequest) (*host.Host, error) {
-	return nil, nil
+	ins, err := i.DescribeHost(ctx, &host.DescribeHostRequest{q.Id})
+	if err != nil {
+		return nil, err
+	}
+
+	resstmt, err := i.db.Prepare(deleteResourceSQL)
+	if err != nil {
+		return nil, err
+	}
+	defer resstmt.Close()
+	_, err = resstmt.Exec(q.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	descstmt, err := i.db.Prepare(deleteDescribeSQL)
+	if err != nil {
+		return nil, err
+	}
+	defer descstmt.Close()
+	_, err = descstmt.Exec(q.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return ins, nil
 }
