@@ -1,6 +1,6 @@
 PROJECT_NAME=restfulapi-demo
 MAIN_FILE=main.go
-PKG := "github.com/HAOlowkey/${PROJECT_NAME}"
+PKG := "github.com/HAOlowkey/$(PROJECT_NAME)"
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 GO_FILES := $(shell find . -name '*.go' | grep -v /vendor/ | grep -v _test.go)
 
@@ -25,19 +25,28 @@ test-coverage: ## Run tests with coverage
 	@cat cover.out >> coverage.txt
 
 build: dep ## Build the binary file
-	@go build -ldflags "-s -w" -o dist/${PROJECT_NAME} ${MAIN_FILE}
+	@go build -ldflags "-s -w" -o dist/${PROJECT_NAME} $(MAIN_FILE)
 
 linux: dep ## Build the binary file
-	@GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/${PROJECT_NAME} ${MAIN_FILE}
+	@GOOS=linux GOARCH=amd64 go build -ldflags "-s -w" -o dist/${PROJECT_NAME} $(MAIN_FILE)
+
+install: dep ## install grpc gen tools
+	@go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	@go install github.com/favadi/protoc-go-inject-tag@latest
+
+gen: ## generate code
+	@protoc -I=. --go_out=. --go_opt=module=${PKG} --go-grpc_out=. --go-grpc_opt=module=${PKG} apps/*/pb/*.proto
 
 run: # Run Develop server
-	@go run ${MAIN_FILE} start 
+	@go run $(MAIN_FILE) start 
 
 clean: ## Remove previous build
 	@rm -f dist/*
 
-push: # push git to origin repo
+push: # push git to multi repo
+	@git push -u gitee
 	@git push -u origin
 
 help: ## Display this help screen
-	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' ${MAKEFILE_LIST} | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -h -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'

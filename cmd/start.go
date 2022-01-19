@@ -11,8 +11,8 @@ import (
 	"github.com/infraboard/mcube/logger/zap"
 	"github.com/spf13/cobra"
 
-	"github.com/HAOlowkey/restfulapi-demo/app"
-	"github.com/HAOlowkey/restfulapi-demo/app/host/impl"
+	app "github.com/HAOlowkey/restfulapi-demo/apps"
+	"github.com/HAOlowkey/restfulapi-demo/apps/host/impl"
 	"github.com/HAOlowkey/restfulapi-demo/protocol"
 )
 
@@ -55,6 +55,7 @@ func newService(conf *conf.Config) *service {
 	return &service{
 		conf: conf,
 		http: protocol.NewHttpService(),
+		grpc: protocol.NewGrpcService(),
 		log:  zap.L().Named("Service"),
 	}
 }
@@ -62,10 +63,13 @@ func newService(conf *conf.Config) *service {
 type service struct {
 	conf *conf.Config
 	http *protocol.HttpService
+	grpc *protocol.GrpcService
 	log  logger.Logger
 }
 
 func (s *service) start() error {
+	go s.grpc.Start()
+
 	return s.http.Start()
 }
 
@@ -78,6 +82,7 @@ func (s *service) waitSign(sign chan os.Signal) {
 		// term
 		// quick
 		default:
+			s.grpc.Stop()
 			// 资源清理
 			s.log.Infof("receive signal '%v', start graceful shutdown", v.String())
 			if err := s.http.Stop(); err != nil {

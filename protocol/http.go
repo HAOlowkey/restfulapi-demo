@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	hostAPI "github.com/HAOlowkey/restfulapi-demo/app/host/http"
+	hostAPI "github.com/HAOlowkey/restfulapi-demo/apps/host/http"
 	"github.com/HAOlowkey/restfulapi-demo/conf"
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"

@@ -45,10 +45,12 @@ func newDefaultMysql() *mysql {
 
 func newDefaultApp() *app {
 	return &app{
-		Name: "resetful-api",
-		Host: "127.0.0.1",
-		Port: "8090",
-		Key:  "default app key",
+		Name:     "resetful-api",
+		Host:     "127.0.0.1",
+		Port:     "8090",
+		Key:      "default app key",
+		GrpcHost: "127.0.0.1",
+		GrpcPort: "18090",
 	}
 }
 
@@ -118,10 +120,16 @@ func (m *mysql) getDBConn() (*sql.DB, error) {
 }
 
 type app struct {
-	Name string `toml:"name"`
-	Host string `toml:"host"`
-	Port string `toml:"port"`
-	Key  string `toml:"key"`
+	Name     string `toml:"name"`
+	Host     string `toml:"host"`
+	Port     string `toml:"port"`
+	Key      string `toml:"key"`
+	GrpcHost string `toml:"grpc_host"`
+	GrpcPort string `toml:"grpc_port"`
+}
+
+func (a *app) GrpcAddr() string {
+	return fmt.Sprintf("%s:%s", a.GrpcHost, a.GrpcPort)
 }
 
 func (a *app) Addr() string {
