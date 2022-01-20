@@ -11,7 +11,7 @@ func NewClient(conf *ClientConfig) (*Client, error) {
 		return nil, err
 	}
 	return &Client{
-		conf: NewDefaultClientConfig(),
+		conf: conf,
 		conn: conn,
 	}, nil
 }
