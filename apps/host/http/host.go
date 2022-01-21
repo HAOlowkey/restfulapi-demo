@@ -6,12 +6,12 @@ import (
 	"strconv"
 
 	"github.com/HAOlowkey/restfulapi-demo/apps/host"
+	"github.com/infraboard/mcube/http/context"
 	"github.com/infraboard/mcube/http/request"
 	"github.com/infraboard/mcube/http/response"
-	"github.com/julienschmidt/httprouter"
 )
 
-func (h *handler) CreateHost(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *handler) CreateHost(w http.ResponseWriter, r *http.Request) {
 	body, err := request.ReadBody(r)
 	if err != nil {
 		response.Failed(w, err)
@@ -34,7 +34,7 @@ func (h *handler) CreateHost(w http.ResponseWriter, r *http.Request, _ httproute
 	response.Success(w, ins)
 }
 
-func (h *handler) QueryHost(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+func (h *handler) QueryHost(w http.ResponseWriter, r *http.Request) {
 	qs := r.URL.Query()
 	psStr := qs.Get("page_size")
 	pnStr := qs.Get("page_number")
@@ -59,10 +59,11 @@ func (h *handler) QueryHost(w http.ResponseWriter, r *http.Request, _ httprouter
 	response.Success(w, set)
 }
 
-func (h *handler) DescribeHost(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *handler) DescribeHost(w http.ResponseWriter, r *http.Request) {
+	ctx := context.GetContext(r)
 
 	req := &host.DescribeHostRequest{
-		Id: p.ByName("id"),
+		Id: ctx.PS.ByName("id"),
 	}
 
 	host, err := h.host.DescribeHost(r.Context(), req)
@@ -73,7 +74,8 @@ func (h *handler) DescribeHost(w http.ResponseWriter, r *http.Request, p httprou
 	response.Success(w, host)
 }
 
-func (h *handler) PutUpdateHost(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *handler) PutUpdateHost(w http.ResponseWriter, r *http.Request) {
+	ctx := context.GetContext(r)
 	body, err := request.ReadBody(r)
 	if err != nil {
 		response.Failed(w, err)
@@ -88,7 +90,7 @@ func (h *handler) PutUpdateHost(w http.ResponseWriter, r *http.Request, p httpro
 		return
 	}
 
-	req.Host.Resource.Id = p.ByName("id")
+	req.Host.Resource.Id = ctx.PS.ByName("id")
 
 	ins, err := h.host.UpdateHost(r.Context(), req)
 
@@ -99,7 +101,8 @@ func (h *handler) PutUpdateHost(w http.ResponseWriter, r *http.Request, p httpro
 	response.Success(w, ins)
 }
 
-func (h *handler) PatchUpdateHost(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+func (h *handler) PatchUpdateHost(w http.ResponseWriter, r *http.Request) {
+	ctx := context.GetContext(r)
 	body, err := request.ReadBody(r)
 	if err != nil {
 		response.Failed(w, err)
@@ -114,7 +117,7 @@ func (h *handler) PatchUpdateHost(w http.ResponseWriter, r *http.Request, p http
 		return
 	}
 
-	req.Host.Resource.Id = p.ByName("id")
+	req.Host.Resource.Id = ctx.PS.ByName("id")
 
 	ins, err := h.host.UpdateHost(r.Context(), req)
 
@@ -125,8 +128,9 @@ func (h *handler) PatchUpdateHost(w http.ResponseWriter, r *http.Request, p http
 	response.Success(w, ins)
 }
 
-func (h *handler) DeleteHost(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	ins, err := h.host.DeleteHost(r.Context(), &host.DeleteHostRequest{Id: p.ByName("id")})
+func (h *handler) DeleteHost(w http.ResponseWriter, r *http.Request) {
+	ctx := context.GetContext(r)
+	ins, err := h.host.DeleteHost(r.Context(), &host.DeleteHostRequest{Id: ctx.PS.ByName("id")})
 	if err != nil {
 		response.Failed(w, err)
 		return

@@ -13,11 +13,12 @@ func TestHost(t *testing.T) {
 	should := assert.New(t)
 	client, err := client.NewClient(client.NewDefaultClientConfig())
 	should.NoError(err)
-	host, err := client.Host().QueryHost(context.Background(), &host.QueryHostRequest{
+	set, err := client.Host().QueryHost(context.Background(), &host.QueryHostRequest{
 		PageSize:   20,
 		PageNumber: 1,
 	})
 	should.NoError(err)
 
-	t.Log(host)
+	t.Log(set.Items)
+
 }

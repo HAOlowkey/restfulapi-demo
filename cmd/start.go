@@ -7,12 +7,12 @@ import (
 	"syscall"
 
 	"github.com/HAOlowkey/restfulapi-demo/conf"
+	"github.com/infraboard/mcube/app"
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
 	"github.com/spf13/cobra"
 
-	app "github.com/HAOlowkey/restfulapi-demo/apps"
-	"github.com/HAOlowkey/restfulapi-demo/apps/host/impl"
+	_ "github.com/HAOlowkey/restfulapi-demo/apps/all"
 	"github.com/HAOlowkey/restfulapi-demo/protocol"
 )
 
@@ -32,11 +32,12 @@ var startCmd = &cobra.Command{
 			return err
 		}
 
-		if err := impl.Service.Init(); err != nil {
-			return err
-		}
+		// if err := impl.Service.Init(); err != nil {
+		// 	return err
+		// }
 
-		app.Host = impl.Service
+		// app.Host = impl.Service
+		app.InitAllApp()
 
 		svc := newService(conf.C())
 		// 启动服务后，需要处理的事件
@@ -68,6 +69,8 @@ type service struct {
 }
 
 func (s *service) start() error {
+	s.log.Infof("loaded grpc apps %s", app.LoadedGrpcApp())
+	s.log.Infof("loaded http apps %s", app.LoadedHttpApp())
 	go s.grpc.Start()
 
 	return s.http.Start()
@@ -82,9 +85,10 @@ func (s *service) waitSign(sign chan os.Signal) {
 		// term
 		// quick
 		default:
-			s.grpc.Stop()
+
 			// 资源清理
 			s.log.Infof("receive signal '%v', start graceful shutdown", v.String())
+			s.grpc.Stop()
 			if err := s.http.Stop(); err != nil {
 				s.log.Errorf("graceful shutdown err: %s, force exit", err)
 			}

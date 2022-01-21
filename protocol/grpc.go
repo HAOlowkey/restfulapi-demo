@@ -3,9 +3,8 @@ package protocol
 import (
 	"net"
 
-	app "github.com/HAOlowkey/restfulapi-demo/apps"
-	"github.com/HAOlowkey/restfulapi-demo/apps/host"
 	"github.com/HAOlowkey/restfulapi-demo/conf"
+	"github.com/infraboard/mcube/app"
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
 	"google.golang.org/grpc"
@@ -25,7 +24,8 @@ type GrpcService struct {
 }
 
 func (g *GrpcService) Start() {
-	host.RegisterServiceServer(g.s, app.Host)
+	// host.RegisterServiceServer(g.s, app.Host)
+	app.LoadGrpcApp(g.s)
 	addr := conf.C().App.GrpcAddr()
 	lsr, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -44,5 +44,7 @@ func (g *GrpcService) Start() {
 }
 
 func (g *GrpcService) Stop() {
+	g.l.Info("start graceful shutdown")
 	g.s.GracefulStop()
+	g.l.Info("service is stopped")
 }

@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"time"
 
-	hostAPI "github.com/HAOlowkey/restfulapi-demo/apps/host/http"
 	"github.com/HAOlowkey/restfulapi-demo/conf"
+	"github.com/infraboard/mcube/app"
+	"github.com/infraboard/mcube/http/router"
+	"github.com/infraboard/mcube/http/router/httprouter"
 	"github.com/infraboard/mcube/logger"
 	"github.com/infraboard/mcube/logger/zap"
-	"github.com/julienschmidt/httprouter"
 )
 
 func NewHttpService() *HttpService {
@@ -38,13 +39,12 @@ func NewHttpService() *HttpService {
 
 type HttpService struct {
 	server *http.Server
-	r      *httprouter.Router
+	r      router.Router
 	l      logger.Logger
 }
 
 func (s *HttpService) Start() error {
-	hostAPI.Api.Init()
-	hostAPI.Api.Register(s.r)
+	app.LoadHttpApp("", s.r)
 	s.l.Infof("HTTP服务启动成功, 监听地址: %s", s.server.Addr)
 	if err := s.server.ListenAndServe(); err != nil {
 		if err == http.ErrServerClosed {
