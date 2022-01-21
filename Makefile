@@ -37,6 +37,7 @@ install: dep ## install grpc gen tools
 
 gen: ## generate code
 	@protoc -I=. --go_out=. --go_opt=module=${PKG} --go-grpc_out=. --go-grpc_opt=module=${PKG} apps/*/pb/*.proto
+	@protoc-go-inject-tag -input=apps/*/*.pb.go
 
 run: # Run Develop server
 	@go run $(MAIN_FILE) start 
